@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@theme{
+  --color-negro-chat: #212121;
+  --placeholder-chat: #a5a5a5;
+}
