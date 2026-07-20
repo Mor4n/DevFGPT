@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,12 +12,21 @@ import { useOpenRouter } from './hooks/useOpenRouter';
 
 function App() {
 
-  const { messages, isLoading, sendMessage } = useOpenRouter();
+  const {
+    messages,
+    sessions,
+    activeSessionId,
+    isLoading,
+    sendMessage,
+    createNewChat,
+    selectChat,
+    deleteChat
+  } = useOpenRouter();
 
   // configuración de Yup
   const schema = yup.object({
-        message: yup.string().required("Se requiere mandar un mensaje"),
-    });
+    message: yup.string().required("Se requiere mandar un mensaje"),
+  });
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
   
@@ -38,8 +46,14 @@ function App() {
   <>
     <div className="h-screen bg-black flex">
 
-      {/* sidebar izq */}
-      <Sidebar />
+      {/* sidebar izq con Historial */}
+      <Sidebar
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectChat={selectChat}
+        onDeleteChat={deleteChat}
+        onNewChat={createNewChat}
+      />
 
       {/* area der */}
       <div className="flex-1 flex flex-col">
@@ -84,4 +98,3 @@ function App() {
 }
 
 export default App;
-

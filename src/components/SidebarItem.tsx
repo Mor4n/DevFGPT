@@ -1,9 +1,11 @@
 import type { SidebarItemProps } from "../interfaces/FormInterfaces";
 
-function SidebarItem({ icon, children }:SidebarItemProps) {
+function SidebarItem({ icon, children, onClick, active }: SidebarItemProps) {
   return (
     <button
-      className="
+      type="button"
+      onClick={onClick}
+      className={`
         w-full
         flex
         items-center
@@ -12,16 +14,17 @@ function SidebarItem({ icon, children }:SidebarItemProps) {
         py-2
         rounded-lg
         text-sm
-        text-zinc-300
-        hover:bg-zinc-800
-        hover:text-white
         transition
         cursor-pointer
-      "
+        ${active 
+          ? "bg-zinc-800 text-white font-medium" 
+          : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+        }
+      `}
     >
       {icon}
 
-      <span className="truncate">
+      <span className="truncate flex-1 text-left">
         {children}
       </span>
     </button>
