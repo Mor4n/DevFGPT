@@ -1,23 +1,10 @@
 import SidebarItem from "./SidebarItem";
 import History from "./History";
-import type { ChatSession } from "../interfaces/ChatInterfaces";
-import type { MouseEvent } from "react";
+import { useChatContext } from "../context/ChatContext";
 
-interface SidebarProps {
-  sessions: ChatSession[];
-  activeSessionId: string | null;
-  onSelectChat: (id: string) => void;
-  onDeleteChat: (id: string, e?: MouseEvent<HTMLButtonElement>) => void;
-  onNewChat: () => void;
-}
+function Sidebar() {
+  const { createNewChat } = useChatContext();
 
-function Sidebar({
-  sessions,
-  activeSessionId,
-  onSelectChat,
-  onDeleteChat,
-  onNewChat
-}: SidebarProps) {
   return (
     <aside
       className="
@@ -42,7 +29,7 @@ function Sidebar({
       </div>
 
       <SidebarItem
-        onClick={onNewChat}
+        onClick={createNewChat}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,14 +54,9 @@ function Sidebar({
         Nuevo chat
       </SidebarItem>
 
-      <History
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSelectChat={onSelectChat}
-        onDeleteChat={onDeleteChat}
-      />
+      <History />
     </aside>
   );
 }
 
-export default Sidebar;
+export default Sidebar;

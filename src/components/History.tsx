@@ -1,7 +1,9 @@
 import SidebarItem from "./SidebarItem";
-import type { HistoryProps } from "../interfaces/ChatInterfaces";
+import { useChatContext } from "../context/ChatContext";
 
-function History({ sessions, activeSessionId, onSelectChat, onDeleteChat }: HistoryProps) {
+function History() {
+  const { sessions, activeSessionId, selectChat, deleteChat } = useChatContext();
+
   return (
     <div className="flex-1 overflow-y-auto mt-4">
       <p className="text-xs text-zinc-500 px-3 mb-2 font-medium uppercase tracking-wider">
@@ -20,8 +22,7 @@ function History({ sessions, activeSessionId, onSelectChat, onDeleteChat }: Hist
               <div key={session.id} className="group relative flex items-center">
                 <SidebarItem
                   active={isActive}
-                  onClick={() => onSelectChat(session.id)}
-                  
+                  onClick={() => selectChat(session.id)}
                 >
                   {session.title}
                 </SidebarItem>
@@ -29,7 +30,7 @@ function History({ sessions, activeSessionId, onSelectChat, onDeleteChat }: Hist
                 <button
                   type="button"
                   title="Eliminar consulta"
-                  onClick={(e) => onDeleteChat(session.id, e)}
+                  onClick={(e) => deleteChat(session.id, e)}
                   className="
                     absolute 
                     right-2 
@@ -68,3 +69,4 @@ function History({ sessions, activeSessionId, onSelectChat, onDeleteChat }: Hist
 }
 
 export default History;
+

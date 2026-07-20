@@ -7,21 +7,14 @@ import Form from './components/Form';
 import type { FormData } from "./interfaces/FormInterfaces";
 import Sidebar from './components/Sidebar';
 import MessageBubble from './components/MessageBubble';
-import { useOpenRouter } from './hooks/useOpenRouter';
-
+import { useChatContext } from './context/ChatContext';
 
 function App() {
-
   const {
     messages,
-    sessions,
-    activeSessionId,
     isLoading,
-    sendMessage,
-    createNewChat,
-    selectChat,
-    deleteChat
-  } = useOpenRouter();
+    sendMessage
+  } = useChatContext();
 
   // configuración de Yup
   const schema = yup.object({
@@ -47,13 +40,7 @@ function App() {
     <div className="h-screen bg-black flex">
 
       {/* sidebar izq con Historial */}
-      <Sidebar
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSelectChat={selectChat}
-        onDeleteChat={deleteChat}
-        onNewChat={createNewChat}
-      />
+      <Sidebar />
 
       {/* area der */}
       <div className="flex-1 flex flex-col">
