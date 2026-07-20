@@ -1,12 +1,43 @@
-import React from 'react'
+import type { MessageBubbleProps } from '../interfaces/FormInterfaces';
 
-// ponerle color 2b2b2b si es de usuario, si es de chatbot, que se ponga abajo como chatgpt
-function MessageBubble() {
+
+
+function MessageBubble({ message, role }: MessageBubbleProps) {
+
+  const isUser = role === "user";
+
+
   return (
-    <div>
+    <div
+      className={`
+        flex
+        w-full
+        mb-6
+        ${isUser ? "justify-end" : "justify-start"}
+      `}
+    >
+
+      <div
+        className={`
+          max-w-3xl
+          px-4
+          py-3
+          rounded-2xl
+          text-sm
+          leading-relaxed
+
+          ${
+            isUser
+              ? "bg-zinc-700 text-white rounded-br-sm"
+              : "bg-zinc-900 text-zinc-200 rounded-bl-sm"
+          }
+        `}
+      >
+        {message}
+      </div>
 
     </div>
   )
 }
 
-export default MessageBubble
+export default MessageBubble;

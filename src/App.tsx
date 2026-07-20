@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -7,7 +7,7 @@ import Form from './components/Form';
 
 import type { FormData } from "./interfaces/FormInterfaces"
 import Sidebar from './components/Sidebar';
-
+import MessageBubble from './components/MessageBubble';
 
 
 function App() {
@@ -20,22 +20,68 @@ function App() {
   const { register, handleSubmit,reset, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
   
 
-  const [userMsg, setUserMsg] = useState("");
 
   function onSubmit(data:FormData) {
 
-        const { message } = data; 
+    const { message } = data; 
 
-        setUserMsg(message);
+    reset();
 
-        console.log(`msj-${message}`);
-        console.log(`state-${userMsg} (está desfasado por lo asincrono)`);
-        
-        
+     // agregar mensaje del usuario
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "user",
+          message
+        }
+      ]);
 
-        reset() // limpio el input
+    sendMessage(message);
+}
 
-    }
+
+
+    // chatbot
+
+    type Message = {
+      role: "user" | "assistant";
+      message: string;
+    };
+
+    const [messages, setMessages] = useState<Message[]>([
+      {
+        role: "assistant",
+        message: "Hola, ¿en qué puedo ayudarte?"
+      }
+    ]);
+
+
+    async function sendMessage(message:string) {
+
+    const res = await fetch("http://localhost:3000/chat", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({
+        message
+      })
+    });
+
+
+    const data = await res.json();
+
+
+    // agregar respuesta de IA
+    setMessages(prev => [
+      ...prev,
+      {
+        role:"assistant",
+        message:data.response
+      }
+    ]);
+  }
+
 
 
   return (
@@ -51,7 +97,15 @@ function App() {
         {/* msjs */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto p-6 text-white">
-            
+
+              {messages.map((msg, index) => (
+              <MessageBubble
+                key={index}
+                role={msg.role}
+                message={msg.message}
+              />
+            ))}
+
           </div>
         </main>
 
