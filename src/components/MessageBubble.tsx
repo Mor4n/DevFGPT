@@ -1,11 +1,11 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import type { MessageBubbleProps } from '../interfaces/FormInterfaces';
-
-
 
 function MessageBubble({ message, role }: MessageBubbleProps) {
 
   const isUser = role === "user";
-
 
   return (
     <div
@@ -33,11 +33,15 @@ function MessageBubble({ message, role }: MessageBubbleProps) {
           }
         `}
       >
-        {message}
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {message}
+          </ReactMarkdown>
+        </div>
       </div>
 
     </div>
-  )
+  );
 }
 
 export default MessageBubble;

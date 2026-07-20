@@ -22,11 +22,26 @@ app.post("/chat", async (req, res) => {
             chatRequest: {
                 model: "openai/gpt-oss-20b:free",
                 messages: [
-                    {
-                        role: "user",
-                        content: message,
-                    },
-                ],
+                        {
+                            role: "system",
+                            content: `
+                        Responde siempre en Markdown válido.
+
+                        Usa:
+                        - ## para títulos
+                        - listas
+                        - tablas cuando sea útil
+                        - bloques de código con lenguaje especificado
+
+                        No escapes caracteres.
+                        No devuelvas JSON.
+                        `
+                        },
+                        {
+                            role: "user",
+                            content: message
+                        }
+                        ]
             },
         });
 

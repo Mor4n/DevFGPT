@@ -27,6 +27,6 @@ export interface SidebarItemProps {
 export type MessageRole = "user" | "assistant";
 
 export interface MessageBubbleProps {
-    message: ReactNode;
+    message: string;
     role: MessageRole;
 }
