@@ -1,53 +1,17 @@
-import { useState, useEffect } from 'react';
-import type { Message, ChatSession } from '../interfaces/ChatInterfaces';
-
-const KEY = 'dev_fgpt_chat_history';
-
-const DEFAULT_WELCOME_MESSAGE: Message = {
-  role: "assistant",
-  message: "Hola, ¿en qué puedo ayudarte?"
-};
+import { useReducer, useEffect } from 'react';
+import type { Message } from '../interfaces/ChatInterfaces';
+import {
+  chatReducer,
+  getInitialState,
+  KEY
+} from '../reducers/chatReducer';
 
 export function useOpenRouter() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    try {
-      const saved = localStorage.getItem(KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error("Error al cargar historial de localStorage:", e);
-    }
-    return [];
-  });
+  const [state, dispatch] = useReducer(chatReducer, undefined, getInitialState);
 
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
-    const saved = localStorage.getItem(KEY);
-    if (saved) {
-      try {
-        const parsed: ChatSession[] = JSON.parse(saved);
-        if (parsed.length > 0) {
-          return parsed[0].id;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
-  });
+  const { sessions, activeSessionId, messages, isLoading, error } = state;
 
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (activeSessionId) {
-      const found = sessions.find(s => s.id === activeSessionId);
-      if (found) return found.messages;
-    }
-    return [DEFAULT_WELCOME_MESSAGE];
-  });
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Sincronizar sesiones en localStorage
+  // Sincronizar sesiones en localStorage cuando cambie el estado de sesiones
   useEffect(() => {
     try {
       localStorage.setItem(KEY, JSON.stringify(sessions));
@@ -56,92 +20,34 @@ export function useOpenRouter() {
     }
   }, [sessions]);
 
-  // Actualizar los mensajes
-  useEffect(() => {
-    if (activeSessionId) {
-      const active = sessions.find(s => s.id === activeSessionId);
-      if (active) {
-        setMessages(active.messages);
-        return;
-      }
-    }
-    setMessages([DEFAULT_WELCOME_MESSAGE]);
-  }, [activeSessionId, sessions]);
-
-  // Nuevo xhat
+  // Nuevo chat
   const createNewChat = () => {
-    setActiveSessionId(null);
-    setMessages([DEFAULT_WELCOME_MESSAGE]);
-    setError(null);
+    dispatch({ type: 'NEW_CHAT' });
   };
 
   // Seleccionar chat
   const selectChat = (id: string) => {
-    setActiveSessionId(id);
-    const selected = sessions.find(s => s.id === id);
-    if (selected) {
-      setMessages(selected.messages);
-    }
-    setError(null);
+    dispatch({ type: 'SELECT_CHAT', payload: id });
   };
 
   // Eliminar chat
   const deleteChat = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    const updated = sessions.filter(s => s.id !== id);
-    setSessions(updated);
-
-    if (activeSessionId === id) {
-      if (updated.length > 0) {
-        setActiveSessionId(updated[0].id);
-        setMessages(updated[0].messages);
-      } else {
-        createNewChat();
-      }
-    }
+    dispatch({ type: 'DELETE_CHAT', payload: id });
   };
 
   const sendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return;
 
-    const userMessage: Message = {
-      role: "user",
-      message: messageContent
-    };
+    const currentId = activeSessionId || Date.now().toString();
 
-    let currentId = activeSessionId;
-    let newSessions = [...sessions];
+    dispatch({
+      type: 'ADD_USER_MESSAGE',
+      payload: { messageContent, sessionId: currentId }
+    });
 
-    // Si no hay chat activo o chat nuevo sin id, secrea una nueva sesion
-    if (!currentId) {
-      currentId = Date.now().toString();
-      const newSession: ChatSession = {
-        id: currentId,
-        title: messageContent.slice(0, 30) + (messageContent.length > 30 ? "..." : ""),
-        createdAt: Date.now(),
-        messages: [DEFAULT_WELCOME_MESSAGE, userMessage]
-      };
-      newSessions = [newSession, ...newSessions];
-      setActiveSessionId(currentId);
-      setSessions(newSessions);
-      setMessages(newSession.messages);
-    } else {
-      // Añadir mensaje de user a la sesion actual
-      newSessions = newSessions.map(s => {
-        if (s.id === currentId) {
-          return {
-            ...s,
-            messages: [...s.messages, userMessage]
-          };
-        }
-        return s;
-      });
-      setSessions(newSessions);
-      setMessages(prev => [...prev, userMessage]);
-    }
-
-    setIsLoading(true);
-    setError(null);
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
       const res = await fetch("http://localhost:3000/chat", {
@@ -162,49 +68,33 @@ export function useOpenRouter() {
         message: data.response
       };
 
-      setSessions(prevSessions =>
-        prevSessions.map(s => {
-          if (s.id === currentId) {
-            return {
-              ...s,
-              messages: [...s.messages, assistantMessage]
-            };
-          }
-          return s;
-        })
-      );
-
-      setMessages(prev => [...prev, assistantMessage]);
+      dispatch({
+        type: 'ADD_BOT_MESSAGE',
+        payload: { message: assistantMessage, sessionId: currentId }
+      });
 
     } catch (err: unknown) {
       console.error("Error al comunicarse con OpenRouter:", err);
       const errMsg = err instanceof Error ? err.message : "Error.";
-      setError(errMsg);
 
       const errorMessage: Message = {
         role: "assistant",
         message: "Ocurrió un error al querer obtener la respuesta u.u (no me desconectes)"
       };
 
-      setSessions(prevSessions =>
-        prevSessions.map(s => {
-          if (s.id === currentId) {
-            return {
-              ...s,
-              messages: [...s.messages, errorMessage]
-            };
-          }
-          return s;
-        })
-      );
-
-      setMessages(prev => [...prev, errorMessage]);
+      dispatch({ type: 'SET_ERROR', payload: errMsg });
+      dispatch({
+        type: 'ADD_BOT_MESSAGE',
+        payload: { message: errorMessage, sessionId: currentId }
+      });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
   return {
+    state,
+    dispatch,
     messages,
     sessions,
     activeSessionId,
@@ -213,8 +103,7 @@ export function useOpenRouter() {
     sendMessage,
     createNewChat,
     selectChat,
-    deleteChat,
-    setMessages
+    deleteChat
   };
 }
 
