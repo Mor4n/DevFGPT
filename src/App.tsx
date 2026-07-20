@@ -6,6 +6,9 @@ import * as yup from "yup";
 import Form from './components/Form';
 
 import type { FormData } from "./interfaces/FormInterfaces"
+import Sidebar from './components/Sidebar';
+
+
 
 function App() {
 
@@ -36,22 +39,37 @@ function App() {
 
 
   return (
-    <>
-      <div className="h-screen bg-black flex flex-col">
+  <>
+    <div className="h-screen bg-black flex">
 
+      {/* sidebar izq */}
+      <Sidebar />
 
+      {/* area der */}
+      <div className="flex-1 flex flex-col">
+
+        {/* msjs */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto p-6 text-white">
-
+            
           </div>
         </main>
 
+        {/* formulario */}
         <footer className="sticky bottom-0 bg-linear-to-t from-black via-black to-transparent pb-6">
-            <Form onSubmit={onSubmit} handleSubmit={handleSubmit} register={register} errors={errors}/>
+          <Form 
+            onSubmit={onSubmit} 
+            handleSubmit={handleSubmit} 
+            register={register} 
+            errors={errors}
+          />
         </footer>
+
       </div>
-    </>
-  );
+
+    </div>
+  </>
+);
 }
 
 export default App;
