@@ -25,7 +25,9 @@ function App() {
 
         setUserMsg(message);
 
-        console.log(`${message}`);
+        console.log(`msj-${message}`);
+        console.log(`state-${userMsg} (está desfasado por lo asincrono)`);
+        
         
 
         reset() // limpio el input
