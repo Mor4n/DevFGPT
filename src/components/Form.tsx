@@ -1,24 +1,13 @@
-import type { UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import InputChat from "./InputChat";
 
-interface Props {
-    register: UseFormRegister<FormData>;
-    handleSubmit: UseFormHandleSubmit<FormData>;
-    onSubmit: (data: FormData) => void;
-    userMsg: string;
-    setUserMsg: React.Dispatch<React.SetStateAction<string>>;
-}
+import type {FormProps} from "../interfaces/FormInterfaces"
 
-function Form({register, handleSubmit, onSubmit, userMsg, setUserMsg}:Props  ){
-    
+
+function Form({onSubmit,handleSubmit,register, errors}:FormProps  ){
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <InputChat 
-            register={register}
-            userMsg={userMsg}
-            setUserMsg={setUserMsg}
-            />
+            <InputChat register={register} errors={errors}/>
         </form>
     );
 }

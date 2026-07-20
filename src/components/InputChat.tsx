@@ -1,11 +1,20 @@
+import type { InputChatProps } from '../interfaces/FormInterfaces';
 
-function InputChat() {
+
+
+
+function InputChat({ register,errors }:InputChatProps) {
+
+
+  
 
   return (
+
     <div className="max-w-3xl mx-auto px-4">
       <div className="flex items-center rounded-full bg-[#2f2f2f] border border-gray-700 pl-5 pr-2  shadow-lg">
         
             <input
+          {...register("message")}
           type="text"
           placeholder="Preguntar lo que quieras..."
           className="
@@ -17,9 +26,19 @@ function InputChat() {
             text-[15px]
             py-4
           "
+           
         />
 
+        {
+                errors.message && (
+                    <p className="text-red-500 text-sm">
+                        {errors.message.message}
+                    </p>
+                )
+            }
+
         <button
+        type="submit"
           className="
             ml-3
             h-10
