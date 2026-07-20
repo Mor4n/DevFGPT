@@ -10,6 +10,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// este es el endpoint de la asignación 4
+app.get("/", (req, res) => {
+  res.send("Hola Mundo");
+});
+
+// todo lo de abajo es del chatbot, ya lo tenia anteriormente
 const client = new OpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,
 });
